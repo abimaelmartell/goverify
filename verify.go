@@ -122,7 +122,7 @@ func (self *VerifyResult) CheckIsDisposable() {
 
 	s := string(b)
 
-	self.IsDisposable = strings.Contains(s, self.Email)
+	self.IsDisposable = strings.Contains(s, self.Domain)
 }
 
 func addressExists(client *smtp.Client, address string) bool {
