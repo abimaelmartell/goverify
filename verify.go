@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/smtp"
@@ -109,11 +108,15 @@ func (self *VerifyResult) Verify() {
 
 	if self.MailboxExist {
 		self.CheckIsCatchAll()
+
+		if self.IsCatchAll {
+			self.CheckIsDisposable()
+		}
 	}
 }
 
 func (self *VerifyResult) CheckIsDisposable() {
-	b, err := ioutil.ReadFile("input.txt")
+	b, err := Asset("input.txt")
 
 	if err != nil {
 		panic(err)
