@@ -1,28 +1,30 @@
 package main
 
 import (
+	"errors"
+	"io/ioutil"
+	"log"
 	"net"
 	"net/smtp"
 	"strings"
 	"time"
-	"errors"
 )
 
 const (
-	SMTP_PORT = "25"
+	SMTP_PORT    = "25"
 	SMTP_TIMEOUT = 30 * time.Second
 )
 
-
 type VerifyResult struct {
-	Result       string       `json:"result,omitempty"`
-	MailboxExist bool         `json:"mailbox_exists"`
-	IsCatchAll   bool         `json:"is_catch_all"`
-	Email        string       `json:"email"`
-	Domain       string       `json:"domain"`
-	User         string       `json:"user"`
+	Result       string `json:"result,omitempty"`
+	MailboxExist bool   `json:"mailbox_exists"`
+	IsCatchAll   bool   `json:"is_catch_all"`
+	IsDisposable bool   `json:"is_disposable"`
+	Email        string `json:"email"`
+	Domain       string `json:"domain"`
+	User         string `json:"user"`
 
-	Client       *smtp.Client `json:"-"`
+	Client *smtp.Client `json:"-"`
 }
 
 func (self *VerifyResult) ConnectSmtp() error {
@@ -39,7 +41,7 @@ func (self *VerifyResult) ConnectSmtp() error {
 	conn, err := net.DialTimeout("tcp", addr, SMTP_TIMEOUT)
 
 	if err != nil {
-		self.Result = "NoMxServersFound"
+		self.Result = "ConnectionRefused"
 
 		return err
 	}
@@ -88,7 +90,6 @@ func (self *VerifyResult) CheckIsCatchAll() {
 	randomAddress := "n0n3x1st1ng4ddr355@" + self.Domain
 
 	self.IsCatchAll = addressExists(self.Client, randomAddress)
-
 }
 
 func (self *VerifyResult) Verify() {
@@ -99,6 +100,8 @@ func (self *VerifyResult) Verify() {
 	}
 
 	if err = self.ConnectSmtp(); err != nil {
+		log.Printf("%s\n", err.Error())
+
 		return
 	}
 
@@ -109,8 +112,19 @@ func (self *VerifyResult) Verify() {
 	}
 }
 
+func (self *VerifyResult) CheckIsDisposable() {
+	b, err := ioutil.ReadFile("input.txt")
 
-func addressExists (client *smtp.Client, address string) bool {
+	if err != nil {
+		panic(err)
+	}
+
+	s := string(b)
+
+	self.IsDisposable = strings.Contains(s, self.Email)
+}
+
+func addressExists(client *smtp.Client, address string) bool {
 	err := client.Mail(address)
 
 	if err != nil {
