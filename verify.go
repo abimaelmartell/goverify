@@ -108,11 +108,9 @@ func (self *VerifyResult) Verify() {
 
 	if self.MailboxExist {
 		self.CheckIsCatchAll()
-
-		if self.IsCatchAll {
-			self.CheckIsDisposable()
-		}
 	}
+
+	self.CheckIsDisposable()
 }
 
 func (self *VerifyResult) CheckIsDisposable() {
