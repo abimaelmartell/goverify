@@ -114,7 +114,7 @@ func (self *VerifyResult) Verify() {
 }
 
 func (self *VerifyResult) CheckIsDisposable() {
-	b, err := Asset("input.txt")
+	b, err := Asset("list.txt")
 
 	if err != nil {
 		panic(err)
