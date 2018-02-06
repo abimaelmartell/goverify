@@ -2,19 +2,23 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
-	log.Println("Starting server at http://localhost:8080")
-
 	http.HandleFunc("/verify", handleRequest)
 
-	httpPort := 8080
+	httpPort := os.Getenv("PORT")
 
-	err := http.ListenAndServe(fmt.Sprintf(":%d", httpPort), logRequest(http.DefaultServeMux))
+	if len(httpPort) == 0 {
+		httpPort = "8080"
+	}
+
+	log.Println("Starting server at http://localhost:" + httpPort)
+
+	err := http.ListenAndServe(":"+httpPort, logRequest(http.DefaultServeMux))
 
 	if err != nil {
 		panic(err)
